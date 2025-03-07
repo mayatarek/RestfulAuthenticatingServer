@@ -8,10 +8,13 @@ const books = [
 ];
 
 const authMiddleware = (req, res, next) => {
-    if (req.params.auth === 'BearerZEWAIL') {
-        next();
+    const authHeader = req.headers['authorization'];
+    const authQuery = req.query.auth;
+
+    if (authHeader === 'Bearer ZEWAIL' || authQuery === 'BearerZEWAIL') {
+        next(); 
     } else {
-        res.status(403).json('no >:( add /BearerZEWAIL');
+        res.status(403).json({ message: 'no >:( add ?auth=BearerZEWAIL' });
     }
 };
 
@@ -25,6 +28,36 @@ router.post('/books', (req, res) => {
     const newBook = req.body;
     books.push(newBook);
     res.status(201).json(newBook);
+});
+
+router.post('/books/borrow/:id', (req, res) => {
+    const id = parseInt(req.params.id);
+    const book = books.find((book) => book.id === id);
+
+    if (!book) {
+        return res.status(404).json({ error: `No book with id:${id} is found :(` });
+    }
+    if (book.status === "checked out") {
+        return res.status(400).json({ error: "Book is already checked out!" });
+    }
+
+    book.status = "checked out";
+    res.json({ message: "Book borrowed successfully!", book });
+});
+
+router.post('/books/return/:id', (req, res) => {
+    const id = parseInt(req.params.id);
+    const book = books.find((book) => book.id === id);
+
+    if (!book) {
+        return res.status(404).json({ error: `No book with id:${id} is found :(` });
+    }
+    if (book.status === "available") {
+        return res.status(400).json({ error: "Book is already returned!" });
+    }
+
+    book.status = "available";
+    res.json({ message: "Book returned successfully!", book });
 });
 
 router.get('/items', (req, res) => {
