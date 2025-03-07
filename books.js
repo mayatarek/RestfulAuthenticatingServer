@@ -2,16 +2,24 @@ const express = require('express');
 const router = express.Router();
 
 const books = [
-    { id: 1, title: 'Book name 1', author: 'Ahmed Ahmed', price: 50 },
-    { id: 2, title: 'Amazing book', author: 'Mohammed Mohammed', price: 376 },
-    { id: 3, title: 'Wow a name', author: 'Ashraf Ashraf Ashraf ibn Ashraf', price: 3999 },
+    { id: 1, title: 'Book name 1', author: 'Ahmed Ahmed', price: 50, status: "checked out" },
+    { id: 2, title: 'Amazing book', author: 'Mohammed Mohammed', price: 376, status: "available" },
+    { id: 3, title: 'Wow a name', author: 'Ashraf Ashraf Ashraf ibn Ashraf', price: 3999, status: "available" },
 ];
 
-router.use(express.json());
+const authMiddleware = (req, res, next) => {
+    if (req.params.auth === 'BearerZEWAIL') {
+        next();
+    } else {
+        res.status(403).json('no >:( add /BearerZEWAIL');
+    }
+};
 
 router.get('/', (req, res) => {
     res.send('This is the root :D');
 });
+
+router.use(authMiddleware);
 
 router.post('/books', (req, res) => {
     const newBook = req.body;
